@@ -23,10 +23,11 @@ Completion applies to the stated acceptance boundary, not every possible behavio
 | `[x] Verified Complete` | Windows Docker/WSL repair and Linux/amd64 image/runtime checks | Local AC-13, E-08 | Docker engine restarts cleanly; 52 tests pass inside Linux. |
 | `[x] Verified Complete` | Production constraints, backup/restart, live Nginx and upstream IP recovery | Local AC-13/16, E-08 | No public ports; disposable fixture data. Caddy configuration validates, public TLS remains pending. |
 | `[x] Verified Complete` | Linux/arm64 image and complete container smoke under emulation | Compatibility boundary, E-09 | Actual OCI host/resources are not established by emulation. |
-| `[i] Implemented — Verification Pending` | Target OCI runtime, public Caddy TLS and remote CI | AC-19 | Actual host, provider and cloud recovery still required. |
+| `[i] Implemented — Verification Pending` | Target OCI runtime and public Caddy TLS | AC-19 | Actual host, provider and cloud recovery still required. |
 | `[!] Blocked` | Public hosted launch | AC-19 | User-created Always Free account, available VM, SSH access and hostname needed. Follow operations.md launch gate. |
 | `[ ] Planned` | Hosted alerts, off-host backup schedule and measured recovery | AC-19 | Runbook exists; operational installation needs selected host. |
-| `[-] Active` | GitHub publication to Nikhil-4404/hookscope | User approved public repository | Git initialized on main with a source-only allowlist, ignored data/keys and privacy-preserving commit email. Browser sign-in/repository creation and first push remain pending. |
+| `[x] Verified Complete` | [Public GitHub source repository](https://github.com/Nikhil-4404/hookscope) | User approved publication; E-10 | main pushed; local and remote commit matched. User data, keys, real environment files and generated dependencies excluded. |
+| `[-] Active` | GitHub-hosted release verification | E-10 | First run passed tests/build/audits/image but exposed a smoke-network portability issue. Explicit subnet fix awaits rerun. |
 | `[~] Deferred` | Public signup, billing, email recovery, team roles, MFA/OAuth, PostgreSQL and multiple workers | PRD later scope | Release is an invited SaaS beta. Revisit with demand or measured limits. |
 
 ## Verification records
@@ -46,6 +47,8 @@ Release handoff: Hookscope-1.0.0-source.zip was inspected with Python ZipFile.te
 
 ARM follow-up **E-09:** `docker buildx build --platform linux/arm64 --load -f backend/Dockerfile -t hookscope:verify-arm64 .` passed. Image ID: sha256:dae7312c47a1f4980c116d46794367b1ac95b6ca03ec5a8187786960d26e1611. `scripts/container_smoke.py --image hookscope:verify-arm64 --platform linux/arm64` passed the same production constraints, session, backup, restart, live gateway/encoded query/byte preservation and forced upstream-IP change checks, with ARM application/Nginx/Caddy containers under Docker Desktop emulation. This is compatibility evidence, not measured native ARM capacity or OCI readiness.
 
+**E-10, GitHub publication:** Public repository [Nikhil-4404/hookscope](https://github.com/Nikhil-4404/hookscope) created and initial main commit `1f1dd4c7774d565efacb8d2939b5de12bfe25dc9` pushed on 2026-10-12. `git ls-remote` matched local HEAD; repository metadata confirmed public visibility. The 57-file source allowlist passed staged whitespace/known-token checks; the only URL-credential match was an inert example.com SSRF rejection fixture. Ignore checks confirmed DBs, keys, real environment files, backups and generated directories are excluded. Commit identity uses the account's GitHub noreply address. [Initial CI run](https://github.com/Nikhil-4404/hookscope/actions/runs/38260345800) on Ubuntu 24.04, Python 3.13.16 and Node 22.23.3 passed 52 tests, pip check, dependency audits, frontend build, Compose validation and Docker build. Container smoke failed because that engine disallows a static IP on automatically configured IPAM. The smoke now recreates only its empty disposable network with Docker's chosen subnet explicitly configured before attaching containers; local full smoke passed after the fix; remote rerun remains pending. This publication does not deploy the public service.
+
 ### Source snapshot
 
 SHA256 prefixes (recompute after changes):
@@ -62,7 +65,7 @@ SHA256 prefixes (recompute after changes):
 | frontend/package-lock.json | 4C1CB4C299AC6569 |
 | backend/requirements.lock | 1C94DD26C03A7E26 |
 | deploy/nginx.conf | 07E2C08A296B8E9D |
-| scripts/container_smoke.py | D92461EB0B7D3621 |
+| scripts/container_smoke.py | F39F4DF745ED8CFE |
 
 ## Technical debt and limitations
 

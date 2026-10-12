@@ -1,6 +1,6 @@
 # Hookscope 1.0
 
-An invitation-only webhook platform with private accounts/workspaces, exact-byte capture, signature verification, HTTPS forwarding, retries and replay. Source: `D:\Gpt projs\Hookscope`.
+An invitation-only webhook platform with private accounts/workspaces, exact-byte capture, signature verification, HTTPS forwarding, retries and replay. [Source on GitHub](https://github.com/Nikhil-4404/hookscope) · [CI checks](https://github.com/Nikhil-4404/hookscope/actions/workflows/verify.yml). Local project: `D:\Gpt projs\Hookscope`.
 
 ## Run locally on Windows
 
@@ -57,6 +57,6 @@ npm.cmd run build
 npm.cmd audit
 ```
 
-From root, `.venv\Scripts\python.exe scripts\benchmark.py` runs a disposable near-quota benchmark without modifying project data. `scripts/container_smoke.py` checks a disposable `hookscope:verify` image/volume after building that tag; it never uses production volumes. For an ARM build tagged `hookscope:verify-arm64`, pass `--image hookscope:verify-arm64 --platform linux/arm64`. Both architectures passed the container smoke locally (ARM under emulation). GitHub CI is supplied but has not run remotely.
+From root, `.venv\Scripts\python.exe scripts\benchmark.py` runs a disposable near-quota benchmark without modifying project data. `scripts/container_smoke.py` checks a disposable `hookscope:verify` image/volume after building that tag; it never uses production volumes. For an ARM build tagged `hookscope:verify-arm64`, pass `--image hookscope:verify-arm64 --platform linux/arm64`. Both architectures passed the container smoke locally (ARM under emulation). GitHub CI runs on pushes and pull requests; see [status.md](status.md) for scoped evidence and outstanding checks.
 
 Current evidence, missing checks and readiness are in [status.md](status.md). Docker/WSL startup is repaired; the Linux/amd64 image, 52 containerized backend tests and live production smoke passed, including proxy recovery after the app IP changed. The implemented SaaS release is not yet a verified public deployment: OCI provisioning/runtime, public TLS, provider traffic and cloud recovery remain to be checked. The free host has no availability SLA.

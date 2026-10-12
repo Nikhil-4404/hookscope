@@ -169,6 +169,16 @@ def main():
         created_volume = True
         run('network', 'create', network, stdout=subprocess.DEVNULL)
         created_network = True
+        # Let Docker select an available subnet, then make it explicit before
+        # attaching any containers. Older engines reject --ip on auto-IPAM
+        # networks, even though network inspect reports the allocated subnet.
+        ipam = json.loads(inspect(network, '{{json .IPAM.Config}}'))
+        if len(ipam) != 1 or not ipam[0].get('Subnet'):
+            raise RuntimeError('Docker did not allocate one subnet for the smoke network.')
+        run('network', 'rm', network, stdout=subprocess.DEVNULL)
+        created_network = False
+        run('network', 'create', '--subnet', ipam[0]['Subnet'], network, stdout=subprocess.DEVNULL)
+        created_network = True
         run('run', '--rm', '-i', *APP_LIMITS, *environment, '-v', volume + ':/app/backend/data',
             *platform_flags, image, 'python', '-m', 'app.configure',
             # Windows text pipes translate LF to CRLF; Linux getpass would keep
