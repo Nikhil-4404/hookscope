@@ -1,0 +1,69 @@
+services:
+  hookscope:
+    image: hookscope:1.0.0
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      HOOKSCOPE_ENV: production
+      HOOKSCOPE_PUBLIC_URL: https://${HOOKSCOPE_DOMAIN:?Set HOOKSCOPE_DOMAIN}
+      HOOKSCOPE_ALLOWED_HOSTS: ${HOOKSCOPE_DOMAIN},localhost
+      HOOKSCOPE_SECURE_COOKIES: "1"
+      HOOKSCOPE_ENCRYPTION_KEY: ${HOOKSCOPE_ENCRYPTION_KEY:?Set the encryption key}
+    volumes:
+      - hookscope-data:/app/backend/data
+      - ./backups:/backups
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1g
+    cpus: 2
+    pids_limit: 128
+    stop_grace_period: 35s
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    networks: [application]
+  gateway:
+    image: nginx:1.28-alpine
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on: [hookscope]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/var/cache/nginx, /var/run, /tmp]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    networks: [application, edge]
+  https:
+    image: caddy:2.10-alpine
+    environment:
+      HOOKSCOPE_DOMAIN: ${HOOKSCOPE_DOMAIN}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [gateway]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    networks: [edge]
+volumes:
+  hookscope-data:
+  caddy-data:
+  caddy-config:
+networks:
+  application:
+  edge:

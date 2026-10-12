@@ -1,0 +1,14 @@
+.venv
+.git
+frontend/node_modules
+backend/data
+backend/tests
+**/__pycache__
+work
+.env
+.env.*
+deploy/*.env
+**/*.key
+**/*.db
+frontend/dist
+outputs

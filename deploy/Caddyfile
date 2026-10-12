@@ -1,0 +1,27 @@
+{
+    admin off
+    log {
+        format filter {
+            wrap json
+            fields {
+                request>uri delete
+                request>headers delete
+            }
+        }
+    }
+    servers {
+        timeouts {
+            read_header 10s
+            read_body 15s
+            write 35s
+            idle 2m
+        }
+        max_header_size 16KB
+    }
+}
+{$HOOKSCOPE_DOMAIN} {
+    encode gzip
+    reverse_proxy gateway:8080 {
+        header_up X-Real-IP {remote_host}
+    }
+}
